@@ -1,0 +1,371 @@
+{
+  "entities": {
+    "Classroom": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Classroom",
+      "type": "object",
+      "description": "Represents a classroom within the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the classroom."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the classroom (e.g., 'Room 101')."
+        },
+        "teacherId": {
+          "type": "string",
+          "description": "Reference to the Teacher who owns this classroom. (Relationship: Teacher 1:N Classroom)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the classroom was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "teacherId",
+        "createdAt"
+      ]
+    },
+    "Teacher": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Teacher",
+      "type": "object",
+      "description": "Represents a teacher using the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the teacher."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the teacher."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the teacher.",
+          "format": "email"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the teacher account was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "createdAt"
+      ]
+    },
+    "ChecklistItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChecklistItem",
+      "type": "object",
+      "description": "Represents an item on the daily classroom checklist.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the checklist item."
+        },
+        "text": {
+          "type": "string",
+          "description": "Text description of the checklist item."
+        },
+        "points": {
+          "type": "number",
+          "description": "Points awarded for completing this checklist item."
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "points"
+      ]
+    },
+    "ChecklistSubmission": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChecklistSubmission",
+      "type": "object",
+      "description": "Represents a single submission of the daily checklist for a classroom.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the checklist submission."
+        },
+        "classroomId": {
+          "type": "string",
+          "description": "Reference to the Classroom this submission belongs to. (Relationship: Classroom 1:N ChecklistSubmission)"
+        },
+        "submittedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the checklist was submitted.",
+          "format": "date-time"
+        },
+        "totalPoints": {
+          "type": "number",
+          "description": "Total points awarded for this checklist submission."
+        },
+        "itemCompletions": {
+          "type": "array",
+          "description": "references to ChecklistItemCompletions for each item on the list (Relationship ChecklistSubmission 1:N ChecklistItemCompletions)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "classroomId",
+        "submittedAt",
+        "totalPoints",
+        "itemCompletions"
+      ]
+    },
+    "ChecklistItemCompletion": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChecklistItemCompletion",
+      "type": "object",
+      "description": "Represents the completion status of a specific checklist item in a particular submission.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the checklist item completion."
+        },
+        "checklistItemId": {
+          "type": "string",
+          "description": "Reference to the ChecklistItem being completed. (Relationship: ChecklistItem 1:N ChecklistItemCompletion)"
+        },
+        "checklistSubmissionId": {
+          "type": "string",
+          "description": "Reference to the ChecklistSubmission this completion belongs to. (Relationship: ChecklistSubmission 1:N ChecklistItemCompletion)"
+        },
+        "isCompleted": {
+          "type": "boolean",
+          "description": "Indicates whether the checklist item was completed."
+        }
+      },
+      "required": [
+        "id",
+        "checklistItemId",
+        "checklistSubmissionId",
+        "isCompleted"
+      ]
+    },
+    "Competition": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Competition",
+      "type": "object",
+      "description": "Represents a monthly competition between classrooms.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the competition."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Date the competition starts.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "Date the competition ends.",
+          "format": "date-time"
+        },
+        "winnerClassroomId": {
+          "type": "string",
+          "description": "Reference to the Classroom that won the competition. Null if not yet finalized. (Relationship: Classroom 1:1 Competition)"
+        }
+      },
+      "required": [
+        "id",
+        "startDate",
+        "endDate"
+      ]
+    },
+    "Admin": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Admin",
+      "type": "object",
+      "description": "Represents an administrator of the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the administrator."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the administrator."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the administrator.",
+          "format": "email"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the admin account was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/teachers/{teacherId}",
+        "definition": {
+          "entityName": "Teacher",
+          "schema": {
+            "$ref": "#/backend/entities/Teacher"
+          },
+          "description": "Stores teacher profiles. Path-based ownership enables simple security rules.",
+          "params": [
+            {
+              "name": "teacherId",
+              "description": "The unique ID of the teacher."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teachers/{teacherId}/classrooms/{classroomId}",
+        "definition": {
+          "entityName": "Classroom",
+          "schema": {
+            "$ref": "#/backend/entities/Classroom"
+          },
+          "description": "Stores classrooms owned by the teacher. `teacherId` is used to enforce ownership. ",
+          "params": [
+            {
+              "name": "teacherId",
+              "description": "The unique ID of the teacher."
+            },
+            {
+              "name": "classroomId",
+              "description": "The unique ID of the classroom."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teachers/{teacherId}/classrooms/{classroomId}/checklistSubmissions/{checklistSubmissionId}",
+        "definition": {
+          "entityName": "ChecklistSubmission",
+          "schema": {
+            "$ref": "#/backend/entities/ChecklistSubmission"
+          },
+          "description": "Stores checklist submissions for a classroom. Located within the classroom to associate submissions with the classroom and teacher who owns it.",
+          "params": [
+            {
+              "name": "teacherId",
+              "description": "The unique ID of the teacher."
+            },
+            {
+              "name": "classroomId",
+              "description": "The unique ID of the classroom."
+            },
+            {
+              "name": "checklistSubmissionId",
+              "description": "The unique ID of the checklist submission."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teachers/{teacherId}/classrooms/{classroomId}/checklistSubmissions/{checklistSubmissionId}/checklistItemCompletions/{checklistItemCompletionId}",
+        "definition": {
+          "entityName": "ChecklistItemCompletion",
+          "schema": {
+            "$ref": "#/backend/entities/ChecklistItemCompletion"
+          },
+          "description": "Stores checklist item completions for a specific submission. Located under the checklist submission for easy access.",
+          "params": [
+            {
+              "name": "teacherId",
+              "description": "The unique ID of the teacher."
+            },
+            {
+              "name": "classroomId",
+              "description": "The unique ID of the classroom."
+            },
+            {
+              "name": "checklistSubmissionId",
+              "description": "The unique ID of the checklist submission."
+            },
+            {
+              "name": "checklistItemCompletionId",
+              "description": "The unique ID of the checklist item completion."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/checklistItems/{checklistItemId}",
+        "definition": {
+          "entityName": "ChecklistItem",
+          "schema": {
+            "$ref": "#/backend/entities/ChecklistItem"
+          },
+          "description": "Stores the definitions of checklist items. Accessible to all teachers and admins.",
+          "params": [
+            {
+              "name": "checklistItemId",
+              "description": "The unique ID of the checklist item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/competitions/{competitionId}",
+        "definition": {
+          "entityName": "Competition",
+          "schema": {
+            "$ref": "#/backend/entities/Competition"
+          },
+          "description": "Stores monthly competitions between classrooms. Competition documents have a `winnerClassroomId` that refers to a classroom.",
+          "params": [
+            {
+              "name": "competitionId",
+              "description": "The unique ID of the competition."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/admins/{adminId}",
+        "definition": {
+          "entityName": "Admin",
+          "schema": {
+            "$ref": "#/backend/entities/Admin"
+          },
+          "description": "Stores admin profiles. Existence in this collection grants admin privileges.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The unique ID of the administrator."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure is designed to support the 'Classroom Champions' application, focusing on security, scalability, and ease of maintenance. It adheres to the principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Queries are not Filters). It leverages structural segregation and access modeling strategies to ensure a robust and secure application.\n\n**Authorization Independence:**\n\n*   The primary method for achieving authorization independence is through path-based ownership. Since the 'Classroom' entity has a 1:N relationship with 'ChecklistSubmission', the checklist submissions will be stored within the classroom document path. This avoids the need for `get()` calls in security rules to verify classroom ownership.\n\n**Structural Segregation:**\n\n*   Teachers and Admins are stored in separate collections (`/teachers` and `/admins`), thus enabling us to apply different security rules. This is important, as teachers will be able to see their own classrooms, whereas admins will be able to see all classrooms.\n\n**Access Modeling:**\n\n*   **Private Data (Teachers):** Classrooms are organized under `/teachers/{teacherId}/classrooms/{classroomId}`, reflecting the ownership relationship. Each teacher can only access classrooms they own.\n*   **Admin Roles:** Admins are stored in `/admins/{adminId}`. Existence in this collection grants administrative privileges.\n\n**QAPs (Rules are not Filters):**\n\n*   The structure supports secure `list` operations (QAPs). For example, a teacher can securely list their classrooms under `/teachers/{teacherId}/classrooms`. The security rules will allow listing only classrooms where the `teacherId` matches the authenticated user's ID. Admin users can retrieve all classrooms.\n\n**Invariants:**\n\n*   The structure supports invariants such as ownership and timestamps. The `teacherId` field in the `/teachers/{teacherId}/classrooms/{classroomId}` path enforces the ownership invariant. Timestamps like `createdAt` and `submittedAt` maintain data integrity."
+  }
+}

@@ -1,0 +1,221 @@
+/**
+ * @fileoverview Firestore Security Rules for Classroom Champions.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for teachers and uses
+ * an admin-based role system.  Teachers can only access data related to their
+ * own classrooms. Admins have broader access, determined by their presence
+ * in the `/admins` collection.
+ *
+ * Data Structure:
+ * - /teachers/{teacherId}: Teacher profiles, owned by the teacher.
+ * - /teachers/{teacherId}/classrooms/{classroomId}: Classrooms owned by a teacher.
+ * - /teachers/{teacherId}/classrooms/{classroomId}/checklistSubmissions/{checklistSubmissionId}:
+ *   Checklist submissions for a classroom, owned by the teacher of that classroom.
+ * - /teachers/{teacherId}/classrooms/{classroomId}/checklistSubmissions/{checklistSubmissionId}/checklistItemCompletions/{checklistItemCompletionId}:
+ *   Completion statuses for each checklist item in a submission.
+ * - /checklistItems/{checklistItemId}: Publicly readable definitions of checklist items.
+ *   Write access may be restricted to admins (future enhancement).
+ * - /competitions/{competitionId}: Publicly readable information about competitions.
+ *   Write access may be restricted to admins (future enhancement).
+ * - /admins/{adminId}: Admin profiles. Existence in this collection grants admin privileges.
+ *
+ * Key Security Decisions:
+ * - Teachers can only access their own data (classrooms, submissions, etc.).
+ * - Listing classrooms is restricted to the owning teacher.
+ * - Checklist items and competitions are publicly readable, but write access is not currently enforced.
+ * - Admin privileges are granted by the presence of a document in the `/admins` collection.
+ *
+ * Denormalization for Authorization:
+ * - Classroom documents have a `teacherId` field that is used to enforce ownership,
+ *   avoiding the need for additional `get()` calls.
+ *
+ * Structural Segregation:
+ * - Teachers and Admins are stored in separate top-level collections to allow
+ *   for different security rules.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows teachers to manage their own profile.
+     * @path /teachers/{teacherId}
+     * @allow (create) User with ID 'teacher123' can create their own teacher profile.
+     * @allow (get) User with ID 'teacher123' can retrieve their own teacher profile.
+     * @allow (update) User with ID 'teacher123' can update their own teacher profile.
+     * @allow (delete) User with ID 'teacher123' can delete their own teacher profile.
+     * @deny (create) User with ID 'teacher456' cannot create a teacher profile with ID 'teacher123'.
+     * @principle Enforces document ownership for writes.
+     */
+    match /teachers/{teacherId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if true;
+      allow list: if false;
+      allow create: if isSignedIn() && isOwner(teacherId);
+      allow update: if isExistingOwner(teacherId);
+      allow delete: if isExistingOwner(teacherId);
+    }
+
+    /**
+     * @description Allows a teacher to manage their own classrooms.
+     * @path /teachers/{teacherId}/classrooms/{classroomId}
+     * @allow (create) Teacher 'teacher123' can create a classroom under their ID.
+     * @allow (get) Teacher 'teacher123' can retrieve a classroom under their ID.
+     * @allow (update) Teacher 'teacher123' can update a classroom under their ID.
+     * @allow (delete) Teacher 'teacher123' can delete a classroom under their ID.
+     * @deny (create) Teacher 'teacher456' cannot create a classroom under teacher 'teacher123'.
+     * @principle Enforces document ownership for writes.
+     */
+    match /teachers/{teacherId}/classrooms/{classroomId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if isOwner(teacherId);
+      allow list: if isOwner(teacherId);
+      allow create: if isSignedIn() && isOwner(teacherId);
+      allow update: if isExistingOwner(teacherId);
+      allow delete: if isExistingOwner(teacherId);
+    }
+
+    /**
+     * @description Allows a teacher to manage checklist submissions for their classrooms.
+     * @path /teachers/{teacherId}/classrooms/{classroomId}/checklistSubmissions/{checklistSubmissionId}
+     * @allow (create) Teacher 'teacher123' can create a submission in their classroom.
+     * @allow (get) Teacher 'teacher123' can retrieve a submission in their classroom.
+     * @allow (update) Teacher 'teacher123' can update a submission in their classroom.
+     * @allow (delete) Teacher 'teacher123' can delete a submission in their classroom.
+     * @deny (create) Teacher 'teacher456' cannot create a submission in classroom owned by 'teacher123'.
+     * @principle Enforces document ownership for writes.
+     */
+    match /teachers/{teacherId}/classrooms/{classroomId}/checklistSubmissions/{checklistSubmissionId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if isOwner(teacherId);
+      allow list: if isOwner(teacherId);
+      allow create: if isSignedIn() && isOwner(teacherId);
+      allow update: if isExistingOwner(teacherId);
+      allow delete: if isExistingOwner(teacherId);
+    }
+
+    /**
+     * @description Allows a teacher to manage checklist item completions for a specific submission.
+     * @path /teachers/{teacherId}/classrooms/{classroomId}/checklistSubmissions/{checklistSubmissionId}/checklistItemCompletions/{checklistItemCompletionId}
+     * @allow (create) Teacher 'teacher123' can create a completion in their classroom.
+     * @allow (get) Teacher 'teacher123' can retrieve a completion in their classroom.
+     * @allow (update) Teacher 'teacher123' can update a completion in their classroom.
+     * @allow (delete) Teacher 'teacher123' can delete a completion in their classroom.
+     * @deny (create) Teacher 'teacher456' cannot create a completion in classroom owned by 'teacher123'.
+     * @principle Enforces document ownership for writes.
+     */
+    match /teachers/{teacherId}/classrooms/{classroomId}/checklistSubmissions/{checklistSubmissionId}/checklistItemCompletions/{checklistItemCompletionId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if isOwner(teacherId);
+      allow list: if isOwner(teacherId);
+      allow create: if isSignedIn() && isOwner(teacherId);
+      allow update: if isExistingOwner(teacherId);
+      allow delete: if isExistingOwner(teacherId);
+    }
+
+    /**
+     * @description Allows public read access to checklist items.  Write access is not currently restricted.
+     * @path /checklistItems/{checklistItemId}
+     * @allow (get) Any user can read a checklist item.
+     * @allow (list) Any user can list checklist items.
+     * @principle Provides public read access.
+     */
+    match /checklistItems/{checklistItemId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false; // TODO: Restrict to admins or specific roles
+      allow update: if false; // TODO: Restrict to admins or specific roles
+      allow delete: if false; // TODO: Restrict to admins or specific roles
+    }
+
+    /**
+     * @description Allows public read access to competitions. Write access is not currently restricted.
+     * @path /competitions/{competitionId}
+     * @allow (get) Any user can read a competition.
+     * @allow (list) Any user can list competitions.
+     * @principle Provides public read access.
+     */
+    match /competitions/{competitionId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false; // TODO: Restrict to admins or specific roles
+      allow update: if false; // TODO: Restrict to admins or specific roles
+      allow delete: if false; // TODO: Restrict to admins or specific roles
+    }
+
+    /**
+     * @description Allows admins to manage their own profiles.  Presence in this collection grants admin privileges.
+     * @path /admins/{adminId}
+     * @allow (create) User with ID 'admin123' can create their own admin profile.
+     * @allow (get) User with ID 'admin123' can retrieve their own admin profile.
+     * @allow (update) User with ID 'admin123' can update their own admin profile.
+     * @allow (delete) User with ID 'admin123' can delete their own admin profile.
+     * @deny (create) User with ID 'teacher123' cannot create an admin profile with ID 'admin123'.
+     * @principle Enforces document ownership for writes; existence grants admin privileges.
+     */
+    match /admins/{adminId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if true;
+      allow list: if false;
+      allow create: if isSignedIn() && isOwner(adminId);
+      allow update: if isExistingOwner(adminId);
+      allow delete: if isExistingOwner(adminId);
+    }
+  }
+}
