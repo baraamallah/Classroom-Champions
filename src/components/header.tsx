@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
+              <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
               <div className="flex flex-col space-y-4 pt-8">
                 <Link href="/" className="flex items-center gap-2 font-bold text-lg mb-4">
                   <Award className="h-6 w-6 text-primary" />
