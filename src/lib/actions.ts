@@ -2,13 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { getChecklistItems, updateClassroomPoints, resetAllPoints } from "./data";
-
-const checklistSchema = z.object({
-  classroomId: z.string(),
-  today: z.string().date(),
-  items: z.array(z.string()),
-});
+import { 
+  getChecklistItems, 
+  updateClassroomPoints, 
+  resetAllPoints,
+  addClassroom,
+  updateClassroom,
+  deleteClassroom,
+  addChecklistItem,
+  updateChecklistItem,
+  deleteChecklistItem
+} from "./data";
+import { Classroom, ChecklistItem } from "./types";
 
 export type FormState = {
   message: string;
@@ -55,4 +60,41 @@ export async function resetCompetition(): Promise<{ message: string }> {
   } catch (error) {
     return { message: "Failed to reset competition." };
   }
+}
+
+// Classroom Actions
+export async function handleAddClassroom(data: Omit<Classroom, 'id' | 'points' | 'pointHistory'>) {
+  await addClassroom(data);
+  revalidatePath('/admin');
+}
+
+export async function handleUpdateClassroom(id: string, data: Partial<Omit<Classroom, 'id'>>) {
+  await updateClassroom(id, data);
+  revalidatePath('/admin');
+  revalidatePath('/leaderboard');
+  revalidatePath('/');
+}
+
+export async function handleDeleteClassroom(id: string) {
+  await deleteClassroom(id);
+  revalidatePath('/admin');
+  revalidatePath('/leaderboard');
+}
+
+// Checklist Item Actions
+export async function handleAddChecklistItem(data: Omit<ChecklistItem, 'id'>) {
+  await addChecklistItem(data);
+  revalidatePath('/admin');
+}
+
+export async function handleUpdateChecklistItem(id: string, data: Partial<Omit<ChecklistItem, 'id'>>) {
+  await updateChecklistItem(id, data);
+  revalidatePath('/admin');
+  revalidatePath('/');
+}
+
+export async function handleDeleteChecklistItem(id: string) {
+  await deleteChecklistItem(id);
+  revalidatePath('/admin');
+  revalidatePath('/');
 }

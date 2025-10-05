@@ -1,4 +1,5 @@
 import type { Classroom, ChecklistItem } from "./types";
+import { v4 as uuidv4 } from 'uuid';
 
 let classrooms: Classroom[] = [
   {
@@ -31,7 +32,7 @@ let classrooms: Classroom[] = [
   },
 ];
 
-const checklistItems: ChecklistItem[] = [
+let checklistItems: ChecklistItem[] = [
   { id: "item-1", label: "Classroom is tidy and organized", points: 10 },
   { id: "item-2", label: "Whiteboard is clean and ready for the next day", points: 5 },
   { id: "item-3", label: "All learning materials are returned to their designated spots", points: 5 },
@@ -49,7 +50,7 @@ export const getClassroom = async (id: string): Promise<Classroom | undefined> =
 };
 
 export const getChecklistItems = async (): Promise<ChecklistItem[]> => {
-  return Promise.resolve(checklistItems);
+  return Promise.resolve(JSON.parse(JSON.stringify(checklistItems)));
 };
 
 export const updateClassroomPoints = async (id: string, pointsToAdd: number, date: string): Promise<Classroom> => {
@@ -69,3 +70,49 @@ export const resetAllPoints = async (): Promise<Classroom[]> => {
   }));
   return Promise.resolve(JSON.parse(JSON.stringify(classrooms)));
 };
+
+// Admin functions for classrooms
+export const addClassroom = async (data: Omit<Classroom, 'id' | 'points' | 'pointHistory'>): Promise<Classroom> => {
+  const newClassroom: Classroom = {
+    id: `cls-${uuidv4()}`,
+    ...data,
+    points: 0,
+    pointHistory: {},
+  };
+  classrooms.push(newClassroom);
+  return Promise.resolve(JSON.parse(JSON.stringify(newClassroom)));
+}
+
+export const updateClassroom = async (id: string, data: Partial<Omit<Classroom, 'id'>>): Promise<Classroom> => {
+  const classroomIndex = classrooms.findIndex((c) => c.id === id);
+  if (classroomIndex === -1) throw new Error("Classroom not found");
+  classrooms[classroomIndex] = { ...classrooms[classroomIndex], ...data };
+  return Promise.resolve(JSON.parse(JSON.stringify(classrooms[classroomIndex])));
+}
+
+export const deleteClassroom = async (id: string): Promise<void> => {
+  classrooms = classrooms.filter(c => c.id !== id);
+  return Promise.resolve();
+}
+
+// Admin functions for checklist items
+export const addChecklistItem = async (data: Omit<ChecklistItem, 'id'>): Promise<ChecklistItem> => {
+  const newItem: ChecklistItem = {
+    id: `item-${uuidv4()}`,
+    ...data,
+  };
+  checklistItems.push(newItem);
+  return Promise.resolve(JSON.parse(JSON.stringify(newItem)));
+}
+
+export const updateChecklistItem = async (id: string, data: Partial<Omit<ChecklistItem, 'id'>>): Promise<ChecklistItem> => {
+  const itemIndex = checklistItems.findIndex((i) => i.id === id);
+  if (itemIndex === -1) throw new Error("Checklist item not found");
+  checklistItems[itemIndex] = { ...checklistItems[itemIndex], ...data };
+  return Promise.resolve(JSON.parse(JSON.stringify(checklistItems[itemIndex])));
+}
+
+export const deleteChecklistItem = async (id: string): Promise<void> => {
+  checklistItems = checklistItems.filter(i => i.id !== id);
+  return Promise.resolve();
+}
