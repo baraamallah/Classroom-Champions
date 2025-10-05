@@ -1,7 +1,7 @@
 "use client";
 
 import type { Classroom, ChecklistItem } from "@/lib/types";
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import { submitChecklist, type FormState } from "@/lib/actions";
 import { useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +25,7 @@ export default function TeacherDashboard({
   today,
 }: TeacherDashboardProps) {
   const initialState: FormState = { message: "", isSuccess: false };
-  const [state, formAction] = useFormState(submitChecklist, initialState);
+  const [state, formAction] = useActionState(submitChecklist, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 
