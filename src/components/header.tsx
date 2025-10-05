@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Award, Shield, Trophy, LayoutDashboard } from "lucide-react";
+import { Award, Shield, Trophy, LayoutDashboard, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Sheet,
@@ -17,6 +17,7 @@ const navLinks = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/admin", label: "Admin", icon: Shield },
+  { href: "/profile", label: "Profile", icon: User },
 ];
 
 export default function Header() {

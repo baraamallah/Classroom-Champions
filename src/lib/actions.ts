@@ -11,7 +11,8 @@ import {
   deleteClassroom,
   addChecklistItem,
   updateChecklistItem,
-  deleteChecklistItem
+  deleteChecklistItem,
+  updateUser
 } from "./data";
 import { Classroom, ChecklistItem } from "./types";
 
@@ -97,4 +98,10 @@ export async function handleDeleteChecklistItem(id: string) {
   await deleteChecklistItem(id);
   revalidatePath('/admin');
   revalidatePath('/');
+}
+
+export async function updateProfile(uid: string, data: { displayName: string }) {
+  await updateUser(uid, data);
+  revalidatePath('/');
+  revalidatePath('/profile');
 }

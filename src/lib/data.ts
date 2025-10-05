@@ -116,3 +116,13 @@ export const deleteChecklistItem = async (id: string): Promise<void> => {
   checklistItems = checklistItems.filter(i => i.id !== id);
   return Promise.resolve();
 }
+
+import { initializeFirebaseServer } from "@/firebase/server";
+import { doc, setDoc } from "firebase/firestore";
+
+const { firestore } = initializeFirebaseServer();
+
+export const updateUser = async (uid: string, data: { displayName: string }) => {
+  const userRef = doc(firestore, "users", uid);
+  await setDoc(userRef, data, { merge: true });
+};
